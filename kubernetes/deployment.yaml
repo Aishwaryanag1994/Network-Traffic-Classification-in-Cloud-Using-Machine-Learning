@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic-classifier
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: traffic-classifier
+  template:
+    metadata:
+      labels:
+        app: traffic-classifier
+    spec:
+      containers:
+      - name: api
+        image: your-registry/traffic-classifier:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+        env:
+        - name: MODEL_PATH
+          value: /models/rf_classifier.joblib
+        volumeMounts:
+        - name: models
+          mountPath: /models
+      volumes:
+      - name: models
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traffic-classifier-svc
+spec:
+  selector:
+    app: traffic-classifier
+  ports:
+  - port: 80
+    targetPort: 8000

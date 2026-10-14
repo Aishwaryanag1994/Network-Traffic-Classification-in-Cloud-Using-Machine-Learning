@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cluster-autoscaler
+  namespace: kube-system
+  labels:
+    k8s-addon: cluster-autoscaler.addons.k8s.io
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cluster-autoscaler
+  template:
+    metadata:
+      labels:
+        app: cluster-autoscaler
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    spec:
+      serviceAccountName: cluster-autoscaler
+      containers:
+      - name: cluster-autoscaler
+        image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.29.0
+        resources:
+          limits:
+            cpu: 100m
+            memory: 300Mi
+          requests:
+            cpu: 100m
+            memory: 300Mi
+        command:
+          - ./cluster-autoscaler
+          - --stderrthreshold=info
+          - --v=4
+        env:
+        - name: AWS_REGION
+          value: eu-central-1  
+        volumeMounts: []
+        imagePullPolicy: Always
+      tolerations:
+      - key: "CriticalAddonsOnly"
+        operator: "Exists"
+      priorityClassName: system-cluster-critical
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-autoscaler
+rules:
+- apiGroups: [""]
+  resources: ["events","endpoints"]
+  verbs: ["create","patch"]
+- apiGroups: [""]
+  resources: ["pods/eviction"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["pods/status","endpoints","pods","services","replicationcontrollers","nodes","persistentvolumeclaims","persistentvolumes"]
+  verbs: ["list","watch","get","update"]
+- apiGroups: ["extensions","apps"]
+  resources: ["replicasets","daemonsets","statefulsets","deployments"]
+  verbs: ["list","watch","get"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses","csinodes","csidrivers","csistoragecapacities"]
+  verbs: ["list","watch","get"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get","list","watch","patch"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["create","get","list","watch","update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-autoscaler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-autoscaler
+subjects:
+- kind: ServiceAccount
+  name: cluster-autoscaler
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-autoscaler
+  namespace: kube-system

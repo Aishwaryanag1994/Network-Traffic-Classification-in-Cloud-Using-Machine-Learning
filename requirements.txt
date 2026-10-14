@@ -1,0 +1,30 @@
+# --- Core numeric stack (compatible with sklearn 1.6.1 on Python 3.11)
+numpy==1.26.4           # sklearn 1.6.x is <2.0; 1.26.4 is the sweet spot
+pandas==2.2.2           # works with numpy 1.26.x
+
+# --- ML
+scikit-learn==1.6.1
+imbalanced-learn==0.12.3   # compatible with sklearn 1.6.x
+joblib==1.4.2
+
+# --- Viz / optional training-time libs
+matplotlib==3.8.4
+scikit-plot==0.3.7         # older project; pin to avoid breaking changes elsewhere
+tabulate==0.9.0
+# --- API & serving
+fastapi==0.115.0
+uvicorn[standard]==0.30.3
+prometheus-client==0.20.0
+pyyaml==6.0.2
+
+# --- Optional exports / ONNX
+skl2onnx==1.17.0
+onnxruntime==1.18.0
+
+# --- Optional deep learning (only if you actually use it at runtime)
+# Consider moving this to a training-only env; it's a big wheel.
+tensorflow==2.16.1 ; platform_system != "Windows" or platform_machine != "ARM64"
+requests>=2.31.0
+
+
+

@@ -1,0 +1,17 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: traffic-classifier-keda
+spec:
+  scaleTargetRef:
+    name: traffic-classifier
+  cooldownPeriod: 60
+  minReplicaCount: 2
+  maxReplicaCount: 15
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://prometheus-server.default.svc.cluster.local
+      metricName: predict_requests_total
+      threshold: "50"
+      query: rate(predict_requests_total[1m])

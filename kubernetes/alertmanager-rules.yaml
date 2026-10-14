@@ -1,0 +1,11 @@
+groups:
+- name: traffic-classifier-alerts
+  rules:
+  - alert: HighAnomalyRate
+    expr: rate(anomaly_requests_total[5m]) > 100
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Anomaly request rate is high"
+      description: "Investigate potential upstream attacks or spikes."

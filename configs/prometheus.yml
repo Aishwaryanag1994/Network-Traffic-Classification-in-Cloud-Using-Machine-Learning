@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+- job_name: 'traffic-classifier'
+  metrics_path: /metrics
+  static_configs:
+  - targets:
+    - "traffic-classifier-svc.default.svc.cluster.local:8000"

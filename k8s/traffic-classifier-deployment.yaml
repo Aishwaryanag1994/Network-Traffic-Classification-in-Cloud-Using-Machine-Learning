@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic-classifier
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traffic-classifier
+  template:
+    metadata:
+      labels:
+        app: traffic-classifier
+    spec:
+      containers:
+        - name: api
+          image: traffic-classifier:latest   
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MODEL_PATH
+              value: "/app/models/rf_classifier.joblib"
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 20
