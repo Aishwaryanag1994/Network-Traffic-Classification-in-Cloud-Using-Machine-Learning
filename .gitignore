@@ -22,3 +22,5 @@ Thumbs.db
 
 # ZIP extraction artifact
 _NUL
+# Large trained model
+models/rf_protocol_classifier.joblib
